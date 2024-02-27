@@ -1,0 +1,21 @@
+{
+  "name": "kinodanparchalarbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@grammyjs/router": "^2.0.0",
+    "dotenv": "^16.4.5",
+    "grammy": "^1.21.1",
+    "mongoose": "^8.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
