@@ -106,8 +106,8 @@ command.on("message", async (ctx) => {
       order_text: message || ctx.message?.caption,
       user_id: ctx.message.from.id,
       forward_date: sendVideo.forward_origin.date,
-      file_id: ctx.message.video.file_id,
-      file_unique_id: ctx.message.video.file_unique_id,
+      file_id: ctx.message.video?.file_id,
+      file_unique_id: ctx.message?.video.file_unique_id,
     });
 
     await ctx.reply(
