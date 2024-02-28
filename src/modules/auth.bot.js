@@ -33,7 +33,7 @@ bot.command("start", async (ctx) => {
           parse_mode: "HTML",
         }
       );
-      let text = `#new_user\n\nFirst name: ${user?.first_name}\nLast name: ${user?.last_name}\nUsername: @${user?.username}\nUser ID: ${user.id}`;
+      let text = `#new_user\n\nFirst name: ${user?.first_name || ""}\nLast name: ${user?.last_name || ""}\nUsername: @${user?.username || ""}\nUser ID: ${user.id}`;
       await ctx.api.sendMessage(config.MESSAGE_GROUP_ID, text, {
         message_thread_id: config.USERS_THREAD_ID,
       });
@@ -106,8 +106,8 @@ command.on("message", async (ctx) => {
       order_text: message || ctx.message?.caption,
       user_id: ctx.message.from.id,
       forward_date: sendVideo.forward_origin.date,
-      file_id: ctx.message.video?.file_id,
-      file_unique_id: ctx.message?.video.file_unique_id,
+      file_id: ctx.message?.video?.file_id,
+      file_unique_id: ctx.message?.video?.file_unique_id,
     });
 
     await ctx.reply(
