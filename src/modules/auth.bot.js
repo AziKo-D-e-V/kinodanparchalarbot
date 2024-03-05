@@ -246,31 +246,36 @@ bot.on("message", async (ctx) => {
       }
     }
   } else {
+    const admin = ctx.session.admin;
     const message = ctx.message.text;
     const message_id = ctx.message.message_id;
     const fromId = ctx.message.from.id;
     const forward_date = ctx.message.forward_date;
 
-    const sendVideo = await ctx.api.forwardMessage(
-      config.MESSAGE_GROUP_ID,
-      fromId,
-      message_id,
-      {
-        message_thread_id: config.MESSAGE_THREAD_ID,
-      }
-    );
+    if (admin != false) {
+      ctx.session.step = "admin";
+    } else {
+      const sendVideo = await ctx.api.forwardMessage(
+        config.MESSAGE_GROUP_ID,
+        fromId,
+        message_id,
+        {
+          message_thread_id: config.MESSAGE_THREAD_ID,
+        }
+      );
 
-    const a = await ordersModel.create({
-      order_text: message || ctx.message?.caption,
-      user_id: ctx.message.from.id,
-      forward_date: sendVideo.forward_origin.date || forward_date,
-      file_id: ctx.message.video?.file_id,
-      file_unique_id: ctx.message.video?.file_unique_id,
-    });
+      const a = await ordersModel.create({
+        order_text: message || ctx.message?.caption,
+        user_id: ctx.message.from.id,
+        forward_date: sendVideo.forward_origin.date || forward_date,
+        file_id: ctx.message.video?.file_id,
+        file_unique_id: ctx.message.video?.file_unique_id,
+      });
 
-    await ctx.reply(
-      "Siz yuborgan kino buyurtmasi adminlarga jo'natildi. Adminlar javobini kuting."
-    );
+      await ctx.reply(
+        "Siz yuborgan kino buyurtmasi adminlarga jo'natildi. Adminlar javobini kuting."
+      );
+    }
   }
 });
 
