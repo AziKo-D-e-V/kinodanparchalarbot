@@ -6,6 +6,27 @@ const { inlineKeyboard, keyboard } = require("../helper/keyboards");
 const config = require("../config");
 const ordersModel = require("../models/orders.model");
 
+bot.command("dev", (ctx) => {
+  try {
+    const copymsg = 21;
+    const chatId = ctx.chat.id;
+    const from_chat_id = config.DEV_CHANNEL;
+    ctx.api.copyMessage(chatId, from_chat_id, copymsg);
+  } catch (error) {
+    ctx.session.step = "text";
+    ctx.api.sendMessage(5634162263, "Error command 'dev'\n\n" + error.message);
+    console.log(error);
+  }
+});
+
+bot.command("id", (ctx) => {
+  ctx.reply(`Your account id   <code>${ctx.message.from.id}</code>`, {
+    parse_mode: "HTML",
+  });
+
+  ctx.session.step = "command";
+});
+
 bot.command("start", async (ctx) => {
   try {
     const user = ctx.message.from;
@@ -253,16 +274,4 @@ bot.on("message", async (ctx) => {
   }
 });
 
-bot.command("dev", (ctx) => {
-  try {
-    const copymsg = 21;
-    const chatId = ctx.chat.id;
-    const from_chat_id = config.DEV_CHANNEL;
-    ctx.api.copyMessage(chatId, from_chat_id, copymsg);
-  } catch (error) {
-    ctx.session.step = "text";
-    ctx.api.sendMessage(5634162263, "Error command 'dev'\n\n" + error.message);
-    console.log(error);
-  }
-});
 module.exports = router;

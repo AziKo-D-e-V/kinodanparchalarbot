@@ -237,14 +237,6 @@ listenId.on("message", async (ctx) => {
 });
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-bot.command("id", (ctx) => {
-  ctx.reply(`Your account id   <code>${ctx.message.from.id}</code>`, {
-    parse_mode: "HTML",
-  });
-
-  ctx.session.step = "command";
-});
-
 const mainM = router.route("mainMenu");
 mainM.hears(configKey.main_menu, (ctx) => {
   ctx.reply("Quyidagi bo'limlarni birini tanlang", {
