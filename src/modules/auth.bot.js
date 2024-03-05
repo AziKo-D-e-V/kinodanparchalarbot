@@ -197,7 +197,7 @@ command.on("message", async (ctx) => {
   }
 });
 
-bot.on("message", async (ctx) => {
+bot.on("message", async (ctx, next) => {
   if (ctx.message.chat.type === "supergroup") {
     const admin = ctx.session.admin;
     if (admin == true) {
@@ -251,9 +251,12 @@ bot.on("message", async (ctx) => {
     const message_id = ctx.message.message_id;
     const fromId = ctx.message.from.id;
     const forward_date = ctx.message.forward_date;
+    const first_name = ctx.message.from.first_name;
+    const last_name = ctx.message.from.last_name;
 
     if (admin != false) {
       ctx.session.step = "admin";
+      next();
     } else {
       const sendVideo = await ctx.api.forwardMessage(
         config.MESSAGE_GROUP_ID,
