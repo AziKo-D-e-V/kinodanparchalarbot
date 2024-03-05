@@ -34,9 +34,7 @@ admin.hears(configKey.send_post, async (ctx) => {
     user_id: user.id,
   });
 
-
-  if(findBotUser.is_admin != true) {
-  
+  if (findBotUser.is_admin != true) {
   }
   ctx.reply(
     "<b>Kinodan.Parchalar</b> kanaliga kino, serial yoki multifilmni jo'nating",
