@@ -8,6 +8,21 @@ const commandBot = require("./helper/commands");
 const token = config.TOKEN;
 const bot = new Bot(token);
 
+bot.api.setMyCommands([
+  {
+    command: "start",
+    description: "Botni qayta ishga tushirish",
+  },
+  {
+    command: "dev",
+    description: "Admin va dasturchi",
+  },
+  {
+    command: "id",
+    description: "ID ni bilish",
+  },
+]);
+
 bot.use(
   session({
     initial: () => ({

@@ -8,6 +8,7 @@ const config = {
   USERS_THREAD_ID: process.env.USERS_THREAD_ID,
   MESSAGE_GROUP_ID: process.env.MESSAGE_GROUP_ID,
   CHANNEL_LINK: process.env.CHANNEL_LINK,
+  DEV_CHANNEL: "-1001975830564",
   TEST_CHANNEL_LINK: "-1001986169547", // test channel "Moon Star"
 };
 

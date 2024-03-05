@@ -28,6 +28,16 @@ admin.hears(configKey.users_counter, async (ctx) => {
 // - - - - - - - - - Send Post Message - - - - - - - - - - -
 
 admin.hears(configKey.send_post, async (ctx) => {
+  const user = ctx.message.from;
+
+  const findBotUser = await usersModel.findOne({
+    user_id: user.id,
+  });
+
+
+  if(findBotUser.is_admin != true) {
+  
+  }
   ctx.reply(
     "<b>Kinodan.Parchalar</b> kanaliga kino, serial yoki multifilmni jo'nating",
     {
@@ -232,10 +242,9 @@ listenId.on("message", async (ctx) => {
 bot.command("id", (ctx) => {
   ctx.reply(`Your account id   <code>${ctx.message.from.id}</code>`, {
     parse_mode: "HTML",
-    reply_markup: keyboard,
   });
 
-  ctx.session.step = "admin";
+  ctx.session.step = "command";
 });
 
 const mainM = router.route("mainMenu");
