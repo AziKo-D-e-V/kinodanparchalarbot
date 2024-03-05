@@ -45,10 +45,13 @@ admin.hears(configKey.send_post, async (ctx) => {
   );
 
   ctx.session.step = "sendPost";
+  // console.log(ctx.session.step);
 });
 
 const sendPost = router.route("sendPost");
 sendPost.on("message:video", async (ctx) => {
+  // console.log(ctx.message.video);
+
   ctx.session.video = {
     file_id: ctx.message.video.file_id,
     file_unique_id: ctx.message.video.file_unique_id,
