@@ -54,10 +54,15 @@ sendPost.on("message:video", async (ctx) => {
     file_unique_id: ctx.message.video.file_unique_id,
   };
 
-  ctx.reply("Kino, serial yoki multifilm nomini kiriting");
+  ctx.reply("Kino, serial yoki multifilm nomini kiriting", {
+    reply_markup: {
+      remove_keyboard: true,
+    },
+  });
 
   ctx.session.step = "savePostCaption";
 });
+
 sendPost.hears(configKey.main_menu, (ctx) => {
   ctx.reply("Quyidagi bo'limlarni birini tanlang", {
     reply_markup: keyboard,
@@ -88,7 +93,11 @@ savePostCaption.on("message", async (ctx) => {
 const sendVideo = router.route("sendVideo");
 sendVideo.hears(configKey.back, (ctx) => {
   ctx.session.step = "savePostCaption";
-  ctx.reply("Kino, serial yoki multifilm nomini kiriting");
+  ctx.reply("Kino, serial yoki multifilm nomini kiriting", {
+    reply_markup: {
+      remove_keyboard: true,
+    },
+  });
 });
 
 sendVideo.hears(configKey.yes, async (ctx) => {
