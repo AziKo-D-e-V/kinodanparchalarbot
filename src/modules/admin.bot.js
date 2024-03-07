@@ -39,19 +39,16 @@ admin.hears(configKey.send_post, async (ctx) => {
   ctx.reply(
     "<b>Kinodan.Parchalar</b> kanaliga kino, serial yoki multifilmni jo'nating",
     {
-      reply_markup: { remove_keyboard: true },
+      reply_markup: mainMenu,
       parse_mode: "HTML",
     }
   );
 
   ctx.session.step = "sendPost";
-  // console.log(ctx.session.step);
 });
 
 const sendPost = router.route("sendPost");
 sendPost.on("message:video", async (ctx) => {
-  // console.log(ctx.message.video);
-
   ctx.session.video = {
     file_id: ctx.message.video.file_id,
     file_unique_id: ctx.message.video.file_unique_id,
@@ -60,6 +57,13 @@ sendPost.on("message:video", async (ctx) => {
   ctx.reply("Kino, serial yoki multifilm nomini kiriting");
 
   ctx.session.step = "savePostCaption";
+});
+sendPost.hears(configKey.main_menu, (ctx) => {
+  ctx.reply("Quyidagi bo'limlarni birini tanlang", {
+    reply_markup: keyboard,
+  });
+
+  ctx.session.step = "admin";
 });
 
 const savePostCaption = router.route("savePostCaption");
@@ -127,7 +131,7 @@ admin.hears(configKey.post_settings, async (ctx) => {
         reply_markup: SettingKeyboard,
       });
 
-      ctx.session.defaultTextId = settings[0].id;
+      ctx.session.defaultTextId = settings[0]?.id;
 
       ctx.session.step = "updateSetting";
     } else {
@@ -143,6 +147,14 @@ admin.hears(configKey.post_settings, async (ctx) => {
 });
 
 const updateSetting = router.route("updateSetting");
+updateSetting.hears(configKey.main_menu, (ctx) => {
+  ctx.reply("Quyidagi bo'limlarni birini tanlang", {
+    reply_markup: keyboard,
+  });
+
+  ctx.session.step = "admin";
+});
+
 updateSetting.hears(configKey.setting_update, (ctx) => {
   ctx.reply("Yangilash uchun matnni jo'nating", {
     reply_markup: mainMenu,
@@ -156,19 +168,27 @@ updateDefaultText.on("message", async (ctx) => {
   const text = ctx.message.text;
   const id = ctx.session.defaultTextId;
 
-  const defaultText = await postSetting.findByIdAndUpdate(
-    id,
-    {
-      caption: text,
-    },
-    { new: true }
-  );
+  if (id == undefined) {
+    const defaultText = await postSetting.create({ caption: text });
+    await ctx.reply(`Post uchun xabar yaratildi\n\n${defaultText?.caption}`, {
+      reply_markup: keyboard,
+    });
+    ctx.session.step = "admin";
+  } else {
+    const defaultText = await postSetting.findByIdAndUpdate(
+      id,
+      {
+        caption: text,
+      },
+      { new: true }
+    );
 
-  await ctx.reply(`Post uchun xabar yangilandi\n\n${defaultText?.caption}`, {
-    reply_markup: keyboard,
-  });
+    await ctx.reply(`Post uchun xabar yangilandi\n\n${defaultText?.caption}`, {
+      reply_markup: keyboard,
+    });
 
-  ctx.session.step = "mainMenu";
+    ctx.session.step = "mainMenu";
+  }
 });
 
 const listenSettingText = router.route("listenSettingText");
@@ -209,7 +229,6 @@ admin.hears(configKey.add_admin, async (ctx) => {
     ctx.reply("Qo'shish kerak bo'lgan adminning ID sini jo'nating");
     ctx.session.step = "listenId";
   }
-  ctx.session.step = "admin";
 });
 
 const listenId = router.route("listenId");
@@ -242,14 +261,6 @@ listenId.on("message", async (ctx) => {
 
 const mainM = router.route("mainMenu");
 mainM.hears(configKey.main_menu, (ctx) => {
-  ctx.reply("Quyidagi bo'limlarni birini tanlang", {
-    reply_markup: keyboard,
-  });
-
-  ctx.session.step = "admin";
-});
-
-updateSetting.hears(configKey.main_menu, (ctx) => {
   ctx.reply("Quyidagi bo'limlarni birini tanlang", {
     reply_markup: keyboard,
   });

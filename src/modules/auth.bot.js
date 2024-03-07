@@ -66,7 +66,6 @@ bot.command("start", async (ctx) => {
         "Kino, serial yoki multifilm buyurtmasi bo'lsa yozib qoldiring."
       );
 
-      ctx.session.admin = false;
       ctx.session.step = "command";
     } else if (findBotUser.is_admin == true) {
       ctx.session.admin = true;
@@ -141,11 +140,14 @@ command.on("message", async (ctx) => {
     await ctx.reply(
       "Siz yuborgan kino buyurtmasi adminlarga jo'natildi. Adminlar javobini kuting."
     );
-    ctx.session.admin = false;
   } else if (ctx.message.chat.type === "supergroup") {
     try {
-      const admin = ctx.session.admin;
-      if (admin != true) {
+      const admin = await usersModel.findOne({
+        user_id: ctx.message.from.id,
+        is_admin: true,
+      });
+
+      if (!admin) {
         ctx.reply("Sizga adminlik huquqi berilmagan🙅‍♂️😔");
         ctx.session.step = "command";
       } else {
@@ -153,7 +155,7 @@ command.on("message", async (ctx) => {
 
         const result = await ordersModel.findOne({ forward_date: data });
 
-        const response = `👮Admin:\n\n${ctx.message.text}`;
+        const response = `👮🏻‍♂️Admin:\n\n${ctx.message.text}`;
 
         try {
           await ctx.api.sendMessage(result.user_id, response, {
@@ -192,94 +194,174 @@ command.on("message", async (ctx) => {
           parse_mode: "HTML",
         }
       );
-      console.log(error);
     }
   }
 });
 
-// bot.on("message", async (ctx, next) => {
-//   if (ctx.message.chat.type === "supergroup") {
-//     const admin = ctx.session.admin;
-//     if (admin == true) {
-//       const data = ctx.message.reply_to_message.forward_date;
-//       try {
-//         const result = await ordersModel.findOne({ forward_date: data });
+bot.on("message", async (ctx, next) => {
+  if (ctx.message.chat.type === "supergroup") {
+    const admin = await usersModel.findOne({
+      user_id: ctx.message.from.id,
+      is_admin: true,
+    });
 
-//         const response = `👮Admin:\n\n${ctx.message.text}`;
-//         try {
-//           await ctx.api.sendMessage(result.user_id, response, {
-//             reply_message_id: ctx.message.reply_to_message.message_id,
-//           });
-//         } catch (error) {
-//           if (
-//             error.error_code === 403 ||
-//             error.description === "Forbidden: bot was blocked by the user"
-//           ) {
-//             await ctx.reply(
-//               `User botni bloklagani bois xabar jo'natilmadi. \n\n<code>${error.message}</code>`,
-//               {
-//                 parse_mode: "HTML",
-//                 message_thread_id: config.MESSAGE_THREAD_ID,
-//               }
-//             );
-//           } else {
-//             await ctx.reply(
-//               `Xabar jonatishdagi xatolik. \n\n<code>${error.message}</code>`,
-//               {
-//                 parse_mode: "HTML",
-//                 message_thread_id: config.MESSAGE_THREAD_ID,
-//               }
-//             );
-//           }
-//         }
+    if (admin) {
+      const data = ctx.message.reply_to_message.forward_date;
+      try {
+        const result = await ordersModel.findOne({ forward_date: data });
 
-//         await ctx.reply("Xabar jo'natildi ✅✅✅", {
-//           message_thread_id: config.MESSAGE_THREAD_ID,
-//         });
-//       } catch (error) {
-//         await ctx.reply(
-//           `Xabar jo'natishda xatolik paydo bo'ldi. \n\n<code>${error.message}</code>`,
-//           {
-//             parse_mode: "HTML",
-//           }
-//         );
-//       }
-//     }
-//   } else {
-//     const admin = ctx.session.admin;
-//     const message = ctx.message.text;
-//     const message_id = ctx.message.message_id;
-//     const fromId = ctx.message.from.id;
-//     const forward_date = ctx.message.forward_date;
-//     const first_name = ctx.message.from.first_name;
-//     const last_name = ctx.message.from.last_name;
+        const response = `👮🏻‍♂️Admin:\n\n${ctx.message.text}`;
+        try {
+          await ctx.api.sendMessage(result.user_id, response, {
+            reply_message_id: ctx.message.reply_to_message.message_id,
+          });
+        } catch (error) {
+          if (
+            error.error_code === 403 ||
+            error.description === "Forbidden: bot was blocked by the user"
+          ) {
+            await ctx.reply(
+              `User botni bloklagani bois xabar jo'natilmadi. \n\n<code>${error.message}</code>`,
+              {
+                parse_mode: "HTML",
+                message_thread_id: config.MESSAGE_THREAD_ID,
+              }
+            );
+          } else {
+            await ctx.reply(
+              `Xabar jonatishdagi xatolik. \n\n<code>${error.message}</code>`,
+              {
+                parse_mode: "HTML",
+                message_thread_id: config.MESSAGE_THREAD_ID,
+              }
+            );
+          }
+        }
 
-//     if (admin != false) {
-//       ctx.session.step = "admin";
-//       next();
-//     } else {
-//       const sendVideo = await ctx.api.forwardMessage(
-//         config.MESSAGE_GROUP_ID,
-//         fromId,
-//         message_id,
-//         {
-//           message_thread_id: config.MESSAGE_THREAD_ID,
-//         }
-//       );
+        await ctx.reply("Xabar jo'natildi ✅✅✅", {
+          message_thread_id: config.MESSAGE_THREAD_ID,
+        });
+      } catch (error) {
+        await ctx.reply(
+          `Xabar jo'natishda xatolik paydo bo'ldi. \n\n<code>${error.message}</code>`,
+          {
+            parse_mode: "HTML",
+          }
+        );
+      }
+    }
+  } else if (ctx.message.chat.type === "private") {
+    const message = ctx.message.text;
+    const message_id = ctx.message.message_id;
+    const fromId = ctx.message.from.id;
+    const forward_date = ctx.message.forward_date;
+    const first_name = ctx.message.from.first_name;
+    const last_name = ctx.message.from.last_name;
+    const user = ctx.message.from;
 
-//       const a = await ordersModel.create({
-//         order_text: message || ctx.message?.caption,
-//         user_id: ctx.message.from.id,
-//         forward_date: sendVideo.forward_origin.date || forward_date,
-//         file_id: ctx.message.video?.file_id,
-//         file_unique_id: ctx.message.video?.file_unique_id,
-//       });
+    const findBotUser = await usersModel.findOne({
+      user_id: user.id,
+    });
 
-//       await ctx.reply(
-//         "Siz yuborgan kino buyurtmasi adminlarga jo'natildi. Adminlar javobini kuting."
-//       );
-//     }
-//   }
-// });
+    if (!findBotUser) {
+      await usersModel.create({
+        first_name: user?.first_name,
+        last_name: user?.last_name,
+        username: user?.username,
+        user_id: user.id,
+      });
+
+      let text = `#new_user\n\nFirst name: ${
+        user?.first_name || ""
+      }\nLast name: ${user?.last_name || ""}\nUsername: @${
+        user?.username || ""
+      }\nUser ID: ${user.id}`;
+      await ctx.api.sendMessage(config.MESSAGE_GROUP_ID, text, {
+        message_thread_id: config.USERS_THREAD_ID,
+      });
+
+      const sendVideo = await ctx.api.forwardMessage(
+        config.MESSAGE_GROUP_ID,
+        fromId,
+        message_id,
+        {
+          message_thread_id: config.MESSAGE_THREAD_ID,
+        }
+      );
+
+      await ctx.reply(
+        "Siz yuborgan kino buyurtmasi adminlarga jo'natildi. Adminlar javobini kuting."
+      );
+
+      const a = await ordersModel.create({
+        order_text: message || ctx.message?.caption,
+        user_id: ctx.message.from.id,
+        forward_date: sendVideo.forward_origin.date || forward_date,
+        file_id: ctx.message.video?.file_id,
+        file_unique_id: ctx.message.video?.file_unique_id,
+      });
+
+      ctx.session.step = "command";
+    } else if (findBotUser.is_admin == true) {
+      if (ctx.session.step == "sendPost") {
+        ctx.session.step = "sendPost";
+      } else if (ctx.session.step == "savePostCaption") {
+        ctx.session.step = "savePostCaption";
+      } else if (ctx.session.step == "sendVideo") {
+        ctx.session.step = "sendVideo";
+      } else if (ctx.session.step == "updateSetting") {
+        ctx.session.step = "updateSetting";
+      } else if (ctx.session.step == "updateDefaultText") {
+        ctx.session.step = "updateDefaultText";
+      } else if (ctx.session.step == "listenSettingText") {
+        ctx.session.step = "listenSettingText";
+      } else if (ctx.session.step == "listenId") {
+        ctx.session.step = "listenId";
+      } else if (ctx.session.step == "mainMenu") {
+        ctx.session.step = "mainMenu";
+      } else {
+        ctx.session.step = "admin";
+      }
+      next();
+    } else {
+      const message = ctx.message.text;
+      const message_id = ctx.message.message_id;
+      const fromId = ctx.message.from.id;
+      const forward_date = ctx.message.forward_date;
+      try {
+        const sendVideoOrMSG = await ctx.api.forwardMessage(
+          config.MESSAGE_GROUP_ID,
+          fromId,
+          message_id,
+          {
+            message_thread_id: config.MESSAGE_THREAD_ID,
+          }
+        );
+
+        const a = await ordersModel.create({
+          order_text: message || ctx.message?.caption,
+          user_id: ctx.message.from.id,
+          forward_date: sendVideoOrMSG.forward_origin.date || forward_date,
+          file_id: ctx.message.video?.file_id,
+          file_unique_id: ctx.message.video?.file_unique_id,
+        });
+        await ctx.reply(
+          "Siz yuborgan kino buyurtmasi adminlarga jo'natildi. Adminlar javobini kuting."
+        );
+
+        ctx.session.step = "command";
+      } catch (error) {
+        await ctx.api.sendMessage(
+          config.MESSAGE_GROUP_ID,
+          `/start funksiyada xatolik <code>${error.message}</code>`,
+          {
+            message_thread_id: 1,
+            parse_mode: "HTML",
+          }
+        );
+      }
+    }
+  }
+});
 
 module.exports = router;
