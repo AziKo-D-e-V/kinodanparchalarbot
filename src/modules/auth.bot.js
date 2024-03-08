@@ -56,8 +56,8 @@ bot.command("start", async (ctx) => {
       );
       let text = `#new_user\n\nFirst name: ${
         user?.first_name || ""
-      }\nLast name: ${user?.last_name || ""}\nUsername: @${
-        user?.username || ""
+      }\nLast name: ${user?.last_name || ""}\nUsername: ${
+        user.username ? `@${user.username}` : ""
       }\nUser ID: ${user.id}`;
       await ctx.api.sendMessage(config.MESSAGE_GROUP_ID, text, {
         message_thread_id: config.USERS_THREAD_ID,
