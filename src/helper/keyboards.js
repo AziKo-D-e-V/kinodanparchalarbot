@@ -5,6 +5,8 @@ const configKey = {
   send_post: "🪄 Post chiqarish 📤",
   post_settings: "📌 Post matnini sozlash 📝",
   add_admin: "👮🏻‍♂️ Admin qo'shish 👮🏻‍♂️",
+  remove_admin: "👮🏻‍♂️ Admindan chiqarish ❌",
+  send_message_for_superadmin: "👮‍♂️ SuperAdminga xabar jo'natish ✅",
   users_counter: "Bot foydalanuvchilari 🧮",
   setting_update: "♻️ Yangilash ♻️",
   main_menu: "🏠 Asosiy bo'limga o'tish",
@@ -14,12 +16,16 @@ const configKey = {
 
 const keys = [
   [configKey.send_post],
-  [configKey.post_settings, configKey.add_admin],
   [configKey.users_counter],
+  [configKey.send_message_for_superadmin],
+  [configKey.post_settings],
+  [configKey.add_admin, configKey.remove_admin],
 ];
 
 const buttonRows = keys.map((row) => row.map((key) => Keyboard.text(key)));
 const keyboard = Keyboard.from(buttonRows).resized();
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 // - - - - - - - - - setting Keyboard - - - - - - - - - - - -
 

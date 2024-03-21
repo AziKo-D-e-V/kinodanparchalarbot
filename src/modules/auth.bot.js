@@ -2,9 +2,10 @@ const { Router } = require("@grammyjs/router");
 const router = new Router((ctx) => ctx.session.step);
 const bot = require("../helper/commands");
 const usersModel = require("../models/users.model");
-const { inlineKeyboard, keyboard } = require("../helper/keyboards");
+const { inlineKeyboard, keyboard, configKey } = require("../helper/keyboards");
 const config = require("../config");
 const ordersModel = require("../models/orders.model");
+const adminMessageModel = require("../models/admin.message.model");
 
 bot.command("dev", (ctx) => {
   try {
@@ -205,49 +206,80 @@ bot.on("message", async (ctx, next) => {
       is_admin: true,
     });
 
-    if (admin) {
-      const data = ctx.message.reply_to_message.forward_date;
-      try {
-        const result = await ordersModel.findOne({ forward_date: data });
+    if (admin && ctx.chat.id == config.MESSAGE_GROUP_ID) {
+      const data = ctx.message.reply_to_message?.forward_date;
 
-        const response = `👮🏻‍♂️Admin:\n\n${ctx.message.text}`;
-        try {
-          await ctx.api.sendMessage(result.user_id, response, {
-            reply_message_id: ctx.message.reply_to_message.message_id,
-          });
-        } catch (error) {
-          if (
-            error.error_code === 403 ||
-            error.description === "Forbidden: bot was blocked by the user"
-          ) {
-            await ctx.reply(
-              `User botni bloklagani bois xabar jo'natilmadi. \n\n<code>${error.message}</code>`,
-              {
-                parse_mode: "HTML",
-                message_thread_id: config.MESSAGE_THREAD_ID,
-              }
-            );
-          } else {
-            await ctx.reply(
-              `Xabar jonatishdagi xatolik. \n\n<code>${error.message}</code>`,
-              {
-                parse_mode: "HTML",
-                message_thread_id: config.MESSAGE_THREAD_ID,
-              }
-            );
-          }
-        }
+      const result = await ordersModel.findOne({ forward_date: data });
+
+      const response = `👮🏻‍♂️Admin:\n\n${ctx.message.text}`;
+      try {
+        await ctx.api.sendMessage(result.user_id, response, {
+          reply_message_id: ctx.message.reply_to_message.message_id,
+        });
 
         await ctx.reply("Xabar jo'natildi ✅✅✅", {
           message_thread_id: config.MESSAGE_THREAD_ID,
         });
       } catch (error) {
-        await ctx.reply(
-          `Xabar jo'natishda xatolik paydo bo'ldi. \n\n<code>${error.message}</code>`,
-          {
-            parse_mode: "HTML",
-          }
-        );
+        if (
+          error.error_code === 403 ||
+          error.description === "Forbidden: bot was blocked by the user"
+        ) {
+          await ctx.reply(
+            `User botni bloklagani bois xabar jo'natilmadi. \n\n<code>${error.message}</code>`,
+            {
+              parse_mode: "HTML",
+              message_thread_id: config.MESSAGE_THREAD_ID,
+            }
+          );
+        } else {
+          await ctx.reply(
+            `Xabar jonatishdagi xatolik. \n\n<code>${error.message}</code>`,
+            {
+              parse_mode: "HTML",
+              message_thread_id: config.MESSAGE_THREAD_ID,
+            }
+          );
+        }
+      }
+    } else if (
+      admin.user_id == "5204343498" &&
+      config.MESSAGES_GROUP_ID == ctx.chat.id
+    ) {
+      const data = ctx.message.reply_to_message?.forward_date;
+
+      const result = await adminMessageModel.findOne({ forward_date: data });
+
+      const response = `👮🏻‍♂️Admin:\n\n${ctx.message.text}`;
+      try {
+        await ctx.api.sendMessage(result.user_id, response, {
+          reply_message_id: ctx.message.reply_to_message.message_id,
+        });
+
+        await ctx.reply("Xabar jo'natildi ✅✅✅", {
+          message_thread_id: config.MESSAGES_THREAD_ID,
+        });
+      } catch (error) {
+        if (
+          error.error_code === 403 ||
+          error.description === "Forbidden: bot was blocked by the user"
+        ) {
+          await ctx.reply(
+            `Admin botni bloklagani bois xabar jo'natilmadi. \n\n<code>${error.message}</code>`,
+            {
+              parse_mode: "HTML",
+              message_thread_id: 410,
+            }
+          );
+        } else {
+          await ctx.reply(
+            `Xabar jonatishdagi xatolik. \n\n<code>${error.message}</code>`,
+            {
+              parse_mode: "HTML",
+              message_thread_id: 410,
+            }
+          );
+        }
       }
     }
   } else if (ctx.message.chat.type === "private") {
@@ -319,6 +351,12 @@ bot.on("message", async (ctx, next) => {
         ctx.session.step = "listenId";
       } else if (ctx.session.step == "mainMenu") {
         ctx.session.step = "mainMenu";
+      } else if (ctx.session.step == "sendMessageToSuperAdmin") {
+        ctx.session.step = "sendMessageToSuperAdmin";
+      } else if (ctx.session.step == "removeAdminIdListen") {
+        ctx.session.step = "removeAdminIdListen";
+      } else if (ctx.session.step == "sendMsgToAdmins") {
+        ctx.session.step = "sendMsgToAdmins";
       } else {
         ctx.session.step = "admin";
       }
@@ -337,13 +375,20 @@ bot.on("message", async (ctx, next) => {
             message_thread_id: config.MESSAGE_THREAD_ID,
           }
         );
+        const photoFileId = ctx.message.photo
+          ? ctx.message.photo[0].file_id
+          : "";
+        const photoFileUniqueId = ctx.message.photo
+          ? ctx.message.photo[0].file_unique_id
+          : "";
 
         const a = await ordersModel.create({
           order_text: message || ctx.message?.caption,
           user_id: ctx.message.from.id,
           forward_date: sendVideoOrMSG.forward_origin.date || forward_date,
-          file_id: ctx.message.video?.file_id,
-          file_unique_id: ctx.message.video?.file_unique_id,
+          file_id: ctx.message.video?.file_id || photoFileId,
+          file_unique_id:
+            ctx.message.video?.file_unique_id || photoFileUniqueId,
         });
         await ctx.reply(
           "Siz yuborgan kino buyurtmasi adminlarga jo'natildi. Adminlar javobini kuting."
