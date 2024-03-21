@@ -130,12 +130,17 @@ command.on("message", async (ctx) => {
       }
     );
 
+    const photoFileId = ctx.message.photo ? ctx.message.photo[0].file_id : "";
+    const photoFileUniqueId = ctx.message.photo
+      ? ctx.message.photo[0].file_unique_id
+      : "";
+
     const a = await ordersModel.create({
       order_text: message || ctx.message?.caption,
       user_id: ctx.message.from.id,
       forward_date: sendVideo.forward_origin.date || forward_date,
-      file_id: ctx.message.video?.file_id,
-      file_unique_id: ctx.message.video?.file_unique_id,
+      file_id: ctx.message.video?.file_id || photoFileId,
+      file_unique_id: ctx.message.video?.file_unique_id || photoFileUniqueId,
     });
 
     await ctx.reply(
@@ -211,35 +216,49 @@ bot.on("message", async (ctx, next) => {
 
       const result = await ordersModel.findOne({ forward_date: data });
 
-      const response = `👮🏻‍♂️Admin:\n\n${ctx.message.text}`;
-      try {
-        await ctx.api.sendMessage(result.user_id, response, {
+      const response = `👮🏻‍♂️Admin:\n\n${
+        ctx.message?.text || ctx.message?.caption
+      }`;
+
+      if (ctx.message.audio) {
+        await ctx.api.sendAudio(result.user_id, ctx.message.audio.file_id, {
+          caption: response,
           reply_message_id: ctx.message.reply_to_message.message_id,
         });
 
         await ctx.reply("Xabar jo'natildi ✅✅✅", {
           message_thread_id: config.MESSAGE_THREAD_ID,
         });
-      } catch (error) {
-        if (
-          error.error_code === 403 ||
-          error.description === "Forbidden: bot was blocked by the user"
-        ) {
-          await ctx.reply(
-            `User botni bloklagani bois xabar jo'natilmadi. \n\n<code>${error.message}</code>`,
-            {
-              parse_mode: "HTML",
-              message_thread_id: config.MESSAGE_THREAD_ID,
-            }
-          );
-        } else {
-          await ctx.reply(
-            `Xabar jonatishdagi xatolik. \n\n<code>${error.message}</code>`,
-            {
-              parse_mode: "HTML",
-              message_thread_id: config.MESSAGE_THREAD_ID,
-            }
-          );
+      } else {
+        try {
+          await ctx.api.sendMessage(result.user_id, response, {
+            reply_message_id: ctx.message.reply_to_message.message_id,
+          });
+
+          await ctx.reply("Xabar jo'natildi ✅✅✅", {
+            message_thread_id: config.MESSAGE_THREAD_ID,
+          });
+        } catch (error) {
+          if (
+            error.error_code === 403 ||
+            error.description === "Forbidden: bot was blocked by the user"
+          ) {
+            await ctx.reply(
+              `User botni bloklagani bois xabar jo'natilmadi. \n\n<code>${error.message}</code>`,
+              {
+                parse_mode: "HTML",
+                message_thread_id: config.MESSAGE_THREAD_ID,
+              }
+            );
+          } else {
+            await ctx.reply(
+              `Xabar jonatishdagi xatolik. \n\n<code>${error.message}</code>`,
+              {
+                parse_mode: "HTML",
+                message_thread_id: config.MESSAGE_THREAD_ID,
+              }
+            );
+          }
         }
       }
     } else if (
@@ -324,13 +343,17 @@ bot.on("message", async (ctx, next) => {
       await ctx.reply(
         "Siz yuborgan kino buyurtmasi adminlarga jo'natildi. Adminlar javobini kuting."
       );
+      const photoFileId = ctx.message.photo ? ctx.message.photo[0].file_id : "";
+      const photoFileUniqueId = ctx.message.photo
+        ? ctx.message.photo[0].file_unique_id
+        : "";
 
       const a = await ordersModel.create({
         order_text: message || ctx.message?.caption,
         user_id: ctx.message.from.id,
         forward_date: sendVideo.forward_origin.date || forward_date,
-        file_id: ctx.message.video?.file_id,
-        file_unique_id: ctx.message.video?.file_unique_id,
+        file_id: ctx.message.video?.file_id || photoFileId,
+        file_unique_id: ctx.message.video?.file_unique_id || photoFileUniqueId,
       });
 
       ctx.session.step = "command";

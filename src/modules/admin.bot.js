@@ -80,6 +80,7 @@ savePostCaption.on("message", async (ctx) => {
 
   ctx.replyWithVideo(ctx.session.video.file_id, {
     caption: caption,
+    caption_entities: ctx.message?.entities,
   });
 
   ctx.reply("Post to'g'riligiga ishonchingiz komilmi?", {
@@ -87,6 +88,7 @@ savePostCaption.on("message", async (ctx) => {
   });
 
   ctx.session.video.caption = caption;
+  ctx.session.video.entities = ctx.message.entities;
 
   ctx.session.step = "sendVideo";
 });
@@ -106,6 +108,7 @@ sendVideo.hears(configKey.yes, async (ctx) => {
 
   const data = await ctx.api.sendVideo(config.CHANNEL_ID, video.file_id, {
     caption: video.caption,
+    caption_entities: video.entities,
   });
 
   await ctx.reply("Muvoffaqiyatli yakunlandi✅", {
@@ -177,7 +180,7 @@ const sendMessageToSuperAdmin = router.route("sendMessageToSuperAdmin");
 sendMessageToSuperAdmin.on("message", async (ctx) => {
   const superAdmin = "5204343498";
   const admin = ctx.message.from.id;
-  
+
   const fromId = ctx.message.from.id;
   const message_id = ctx.message.message_id;
 
