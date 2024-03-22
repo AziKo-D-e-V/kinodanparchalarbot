@@ -375,7 +375,7 @@ listenId.on("message", async (ctx) => {
         config.MESSAGE_GROUP_ID,
         `Yangi admin qo'shishda xatolik \n\n<code>${error.message}</code>`,
         {
-          message_thread_id: 1,
+          message_thread_id: config.ERROR_THREAD_ID,
           parse_mode: "HTML",
         }
       );
@@ -406,9 +406,11 @@ admin.hears(configKey.remove_admin, async (ctx) => {
     let text = admins
       .map(
         (admin, index) =>
-          `${index + 1}. ${admin?.first_name}  ${admin?.last_name} \n${
-            admin?.username || ""
-          } - 🆔 <code>${admin.user_id}</code>`
+          `${index + 1}. ${admin.first_name ? admin.first_name : ""}  ${
+            admin.last_name ? admin.last_name : ""
+          } \n${admin.username ? "@" + admin.username : ""} - 🆔 <code>${
+            admin.user_id
+          }</code>`
       )
       .join(`\n`);
 
@@ -416,7 +418,10 @@ admin.hears(configKey.remove_admin, async (ctx) => {
       parse_mode: "HTML",
     });
     await ctx.reply(
-      "Adminlikni olib tashlash uchun adminning ID sini jo'nating"
+      "Adminlikni olib tashlash uchun adminning ID sini jo'nating",
+      {
+        reply_markup: mainMenu,
+      }
     );
 
     ctx.session.step = "removeAdminIdListen";
@@ -424,6 +429,15 @@ admin.hears(configKey.remove_admin, async (ctx) => {
 });
 
 const removeAdminIdListen = router.route("removeAdminIdListen");
+
+removeAdminIdListen.hears(configKey.main_menu, (ctx) => {
+  ctx.reply("Quyidagi bo'limlarni birini tanlang", {
+    reply_markup: keyboard,
+  });
+
+  ctx.session.step = "admin";
+});
+
 removeAdminIdListen.on("message", async (ctx) => {
   const id = ctx.message.text;
 
@@ -440,7 +454,7 @@ removeAdminIdListen.on("message", async (ctx) => {
     ctx.session.step = "admin";
   } else if (findUserById == "5204343498") {
     ctx.reply("Siz adminlikni o'zingizdan olib tashlay olmaysiz😕", {
-      reply_markup: keyboard,
+      reply_markup: mainMenu,
     });
 
     ctx.session.step = "admin";
@@ -471,6 +485,7 @@ removeAdminIdListen.on("message", async (ctx) => {
     ctx.session.step = "admin";
   }
 });
+
 // --------------------------------------------------------
 
 const mainM = router.route("mainMenu");

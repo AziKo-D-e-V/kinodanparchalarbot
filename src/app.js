@@ -42,11 +42,19 @@ const bootstrap = async (bot) => {
     console.log("Kinodan.Parchalar * * * * - Database connection");
   } catch (error) {
     console.log(error.message);
+    await ctx.api.sendMessage(
+      config.MESSAGE_GROUP_ID,
+      `Database bilan bog'liq muammo \n\n<code>${error.message}</code>`,
+      {
+        message_thread_id: config.ERROR_THREAD_ID,
+        parse_mode: "HTML",
+      }
+    );
   }
 };
 bootstrap();
 
-bot.catch((err) => {
+bot.catch(async (err) => {
   console.log(err);
   const ctx = err.ctx;
   console.error(`Error while handling update ${ctx.update.update_id}:`);
@@ -55,6 +63,14 @@ bot.catch((err) => {
     console.error("Error in request:", e.description);
   } else if (e instanceof HttpError) {
     console.error("Could not contact Telegram:", e);
+    await ctx.api.sendMessage(
+      config.MESSAGE_GROUP_ID,
+      `HttpError xatolik \n\n<code>${err.message}</code>`,
+      {
+        message_thread_id: config.ERROR_THREAD_ID,
+        parse_mode: "HTML",
+      }
+    );
   } else {
     console.error("Unknown error:", e);
   }

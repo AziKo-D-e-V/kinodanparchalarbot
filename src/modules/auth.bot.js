@@ -7,7 +7,7 @@ const config = require("../config");
 const ordersModel = require("../models/orders.model");
 const adminMessageModel = require("../models/admin.message.model");
 
-bot.command("dev", (ctx) => {
+bot.command("dev", async (ctx) => {
   try {
     const copymsg = 21;
     const chatId = ctx.chat.id;
@@ -15,8 +15,14 @@ bot.command("dev", (ctx) => {
     ctx.api.copyMessage(chatId, from_chat_id, copymsg);
   } catch (error) {
     ctx.session.step = "text";
-    ctx.api.sendMessage(5634162263, "Error command 'dev'\n\n" + error.message);
-    console.log(error);
+    await ctx.api.sendMessage(
+      config.MESSAGE_GROUP_ID,
+      `Dev olib kelish bilan muammo \n\n<code>${error.message}</code>`,
+      {
+        message_thread_id: config.ERROR_THREAD_ID,
+        parse_mode: "HTML",
+      }
+    );
   }
 });
 
@@ -106,7 +112,7 @@ bot.command("start", async (ctx) => {
       config.MESSAGE_GROUP_ID,
       `/start funksiyada xatolik <code>${error.message}</code>`,
       {
-        message_thread_id: 1,
+        message_thread_id: config.ERROR_THREAD_ID,
         parse_mode: "HTML",
       }
     );
@@ -184,7 +190,7 @@ command.on("message", async (ctx) => {
               `Xabar jonatishdagi xatolik. \n\n<code>${error.message}</code>`,
               {
                 parse_mode: "HTML",
-                message_thread_id: config.MESSAGE_THREAD_ID,
+                message_thread_id: config.ERROR_THREAD_ID,
               }
             );
           }
@@ -194,10 +200,12 @@ command.on("message", async (ctx) => {
         });
       }
     } catch (error) {
-      await ctx.reply(
+      await ctx.api.sendMessage(
+        config.MESSAGE_GROUP_ID,
         `Xabar jo'natishda xatolik paydo bo'ldi. \n\n<code>${error.message}</code>`,
         {
           parse_mode: "HTML",
+          message_thread_id: config.ERROR_THREAD_ID,
         }
       );
     }
@@ -255,7 +263,7 @@ bot.on("message", async (ctx, next) => {
               `Xabar jonatishdagi xatolik. \n\n<code>${error.message}</code>`,
               {
                 parse_mode: "HTML",
-                message_thread_id: config.MESSAGE_THREAD_ID,
+                message_thread_id: config.ERROR_THREAD_ID,
               }
             );
           }
@@ -295,7 +303,7 @@ bot.on("message", async (ctx, next) => {
             `Xabar jonatishdagi xatolik. \n\n<code>${error.message}</code>`,
             {
               parse_mode: "HTML",
-              message_thread_id: 410,
+              message_thread_id: config.ERROR_THREAD_ID,
             }
           );
         }
@@ -423,7 +431,7 @@ bot.on("message", async (ctx, next) => {
           config.MESSAGE_GROUP_ID,
           `/start funksiyada xatolik <code>${error.message}</code>`,
           {
-            message_thread_id: 1,
+            message_thread_id: config.ERROR_THREAD_ID,
             parse_mode: "HTML",
           }
         );

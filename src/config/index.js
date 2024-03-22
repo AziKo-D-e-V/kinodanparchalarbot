@@ -7,6 +7,7 @@ const config = {
   MESSAGE_THREAD_ID: process.env.MESSAGE_THREAD_ID,
   USERS_THREAD_ID: process.env.USERS_THREAD_ID,
   MESSAGE_GROUP_ID: process.env.MESSAGE_GROUP_ID,
+  ERROR_THREAD_ID: "667",
   MESSAGES_THREAD_ID: "410", // admin messages group thread id
   CHANNEL_LINK: process.env.CHANNEL_LINK,
   MESSAGES_GROUP_ID: "-1001926273739", //admin messages
