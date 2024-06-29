@@ -5,6 +5,7 @@ require("dotenv/config");
 const BotController = require("./modules/admin.bot");
 const Auth = require("./modules/auth.bot");
 const commandBot = require("./helper/commands");
+const { startJob, stopJob, getJobResult } = require("./jobs/cron-job.js");
 const token = config.TOKEN;
 const bot = new Bot(token);
 
@@ -55,7 +56,6 @@ const bootstrap = async (bot) => {
 bootstrap();
 
 bot.catch(async (err) => {
-  console.log(err);
   const ctx = err.ctx;
   console.error(`Error while handling update ${ctx.update.update_id}:`);
   const e = err.error;
@@ -74,6 +74,21 @@ bot.catch(async (err) => {
   } else {
     console.error("Unknown error:", e);
   }
+});
+bot.command("job_result", (ctx) => {
+  const result = getJobResult();
+  ctx.reply(result);
+});
+
+bot.command("job", (ctx) => {
+  startJob();
+  ctx.reply("Job started.");
+});
+
+// Command to stop the job
+bot.command("job_stop", (ctx) => {
+  stopJob();
+  ctx.reply("Job stopped.");
 });
 
 bot.start(console.log("Kinodan.Parchalar bot started"));

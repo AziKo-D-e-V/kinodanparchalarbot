@@ -76,7 +76,15 @@ const savePostCaption = router.route("savePostCaption");
 savePostCaption.on("message", async (ctx) => {
   const defaultCaption = await postSetting.find();
 
-  const caption = `${ctx.message.text}\n\n\n${defaultCaption[0].caption}`;
+  const adminFName = ctx.message.from.first_name
+    ? ctx.message.from.first_name
+    : "";
+
+  const adminLName = ctx.message.from.last_name
+    ? ctx.message.from.last_name
+    : "";
+
+  const caption = `${ctx.message.text}\n\nYuklandi: ${adminFName} ${adminLName} tomonidan\n\n${defaultCaption[0].caption}`;
 
   ctx.replyWithVideo(ctx.session.video.file_id, {
     caption: caption,
@@ -164,8 +172,19 @@ sendMsgToAdmins.on("msg", async (ctx) => {
   });
 
   for (let i = 0; i < admins.length; i++) {
-    setTimeout(() => {
-      ctx.api.sendMessage(admins[i], msg);
+    setTimeout(async () => {
+      try {
+        ctx.api.sendMessage(admins[i], msg);
+      } catch (error) {
+        if (error.error_code == 403) {
+          await ctx.reply("Bot foydalanuvchi tomonidan bloklangan...");
+        } else {
+          ctx.api.sendMessage(config.GROUP_ID, `<code>${error.message}<code>`, {
+            parse_mode: "HTML",
+            message_thread_id: config.ERROR_THREAD_ID,
+          });
+        }
+      }
     }, (admin + 1) * 250);
   }
 
